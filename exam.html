@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Secure Exam</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <div id="warning-message">
+        <strong>⚠️ Warning:</strong>
+        <p id="warning-text"></p>
+    </div>
+
+    <div class="exam-container">
+        <div class="exam-header">
+            <div class="student-info">
+                <span id="student-id">Loading...</span>
+            </div>
+            <div class="timer">Time Left: <span id="timer">00:00:00</span></div>
+            <button id="submit-exam" class="submit-button">Submit Exam</button>
+        </div>
+        <div class="form-container">
+            <iframe id="google-form" sandbox="allow-same-origin allow-scripts allow-forms" referrerpolicy="no-referrer"></iframe>
+        </div>
+    </div>
+
+    <!-- Load scripts -->
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/security.js"></script>
+    <script src="assets/js/exam.js"></script>
+</body>
+</html>
