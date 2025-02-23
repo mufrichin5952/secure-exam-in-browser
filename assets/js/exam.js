@@ -1,175 +1,277 @@
-// Sistem Exam Handler
-class ExamHandler {
+// Tambahan properti di class ExamManager
+class ExamManager {
     constructor() {
-        this.examData = this.getExamData();
-        if (!this.examData) return; // Jika tidak ada data, kembali ke halaman login
-
-        this.timeLeft = this.examData.duration * 60; // Konversi ke detik
-        this.isMobile = this.examData.isMobile;
-        this.isSubmitted = false;
-        this.security = new ExamSecurity();
-        this.setupExam();
-    }
-
-    // Ambil data exam dari session storage
-    getExamData() {
-        const data = sessionStorage.getItem('examData');
-        if (!data) {
-            window.location.href = 'index.html';
-            return null;
-        }
-        return JSON.parse(data);
-    }
-
-    // Setup halaman exam
-    setupExam() {
-        this.createExamInterface();
-        this.loadGoogleForm();
-        this.startTimer();
-        this.setupEventListeners();
-        this.setupBeforeUnload();
-    }
-
-    // Buat interface exam
-    createExamInterface() {
-        const examContainer = document.createElement('div');
-        examContainer.className = 'exam-container';
-        examContainer.innerHTML = `
-            <div class="exam-header">
-                <div class="student-info">
-                    <span>Student ID: ${this.examData.studentId}</span>
-                </div>
-                <div class="timer">Time Left: <span id="timer">Loading...</span></div>
-                <button id="submit-exam" class="submit-button">Submit Exam</button>
-            </div>
-            <div class="form-container">
-                <iframe id="google-form" class="exam-frame" sandbox="allow-same-origin allow-scripts allow-forms" referrerpolicy="no-referrer"></iframe>
-            </div>
-        `;
-        document.body.appendChild(examContainer);
-    }
-
-    // Load Google Form
-    loadGoogleForm() {
-        const iframe = document.getElementById('google-form');
-        iframe.src = this.examData.formUrl;
+        // Properti yang sudah ada
+        this.token = sessionStorage.getItem('examToken');
+        this.formUrl = sessionStorage.getItem('formUrl');
+        this.duration = parseInt(sessionStorage.getItem('duration'));
+        this.studentId = sessionStorage.getItem('studentId');
         
-        iframe.onload = () => {
-            this.handleFormLoad();
-        };
+        // Properti baru
+        this.autoSaveInterval = null;
+        this.lastSaveTime = null;
+        this.isSubmitting = false;
+        this.hasChanges = false;
+        this.loadingOverlay = document.getElementById('loadingOverlay');
+        this.confirmModal = document.getElementById('confirmSubmit');
+        this.saveStatus = document.getElementById('saveStatus');
+        
+        if (!this.token || !this.formUrl || !this.duration) {
+            window.location.href = 'index.html';
+            return;
+        }
+
+        this.initialize();
     }
 
-    // Handle saat form selesai loading
-    handleFormLoad() {
-        const iframe = document.getElementById('google-form');
+    async initialize() {
         try {
-            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-            
-            // Auto-fill student ID jika ada field yang sesuai
-            const inputs = iframeDoc.getElementsByTagName('input');
-            for (let input of inputs) {
-                if (input.type === 'text' && 
-                    (input.name.toLowerCase().includes('id') || 
-                     input.placeholder.toLowerCase().includes('id'))) {
-                    input.value = this.examData.studentId;
-                }
-            }
+            this.showLoading('Initializing exam...');
+            await examSecurity.initialize();
 
-            // Monitor form submission
-            const forms = iframeDoc.getElementsByTagName('form');
-            if (forms.length > 0) {
-                forms[0].addEventListener('submit', (e) => {
-                    this.handleFormSubmit(e);
-                });
+            // Setup exam environment
+            await this.setupExamForm();
+            await this.loadSavedProgress();
+            await this.startExam();
+            this.setupEventListeners();
+            this.setupAutoSave();
+            
+            this.hideLoading();
+        } catch (error) {
+            console.error('Error initializing exam:', error);
+            this.showError('Failed to initialize exam');
+            this.hideLoading();
+        }
+    }
+
+    showLoading(message) {
+        this.loadingOverlay.querySelector('.loading-text').textContent = message || 'Loading...';
+        this.loadingOverlay.classList.remove('hidden');
+    }
+
+    hideLoading() {
+        this.loadingOverlay.classList.add('hidden');
+    }
+
+    setupAutoSave() {
+        this.autoSaveInterval = setInterval(() => {
+            if (this.hasChanges) {
+                this.saveProgress();
+            }
+        }, 30000); // Auto save setiap 30 detik jika ada perubahan
+    }
+
+    async saveProgress() {
+        if (!this.hasChanges) return;
+
+        try {
+            this.updateSaveStatus('saving');
+            const examFrame = document.getElementById('examForm');
+            const formData = await this.getFormData(examFrame);
+
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'saveProgress',
+                    data: {
+                        token: this.token,
+                        progress: formData
+                    }
+                })
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                this.lastSaveTime = new Date();
+                this.hasChanges = false;
+                this.updateSaveStatus('saved');
+            } else {
+                throw new Error('Failed to save progress');
             }
         } catch (error) {
-            console.warn('Cannot access iframe content due to same-origin policy');
+            console.error('Error saving progress:', error);
+            this.updateSaveStatus('error');
         }
     }
 
-    // Timer ujian
-    startTimer() {
-        const timerElement = document.getElementById('timer');
-        
-        const updateTimer = () => {
-            if (this.timeLeft <= 0) {
-                this.handleTimeUp();
-                return;
+    async loadSavedProgress() {
+        try {
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'getProgress',
+                    data: { token: this.token }
+                })
+            });
+
+            const result = await response.json();
+            if (result.success && result.data) {
+                await this.restoreFormData(result.data.progress);
+                this.lastSaveTime = new Date(result.data.timestamp);
+                this.updateSaveStatus('saved');
             }
-
-            const hours = Math.floor(this.timeLeft / 3600);
-            const minutes = Math.floor((this.timeLeft % 3600) / 60);
-            const seconds = this.timeLeft % 60;
-
-            timerElement.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-            
-            // Warning saat waktu hampir habis
-            if (this.timeLeft === 300) { // 5 menit terakhir
-                this.security.showWarning('5 minutes remaining!');
-                this.security.provideFeedback();
-            }
-
-            this.timeLeft--;
-        };
-
-        updateTimer();
-        this.timerInterval = setInterval(updateTimer, 1000);
+        } catch (error) {
+            console.error('Error loading saved progress:', error);
+            this.showError('Failed to load saved progress');
+        }
     }
 
-    // Setup event listeners
+    updateSaveStatus(status) {
+        const statusDiv = this.saveStatus;
+        statusDiv.className = 'save-status';
+        
+        switch(status) {
+            case 'saving':
+                statusDiv.textContent = 'Saving...';
+                statusDiv.classList.add('saving');
+                break;
+            case 'saved':
+                statusDiv.textContent = `Last saved: ${new Date().toLocaleTimeString()}`;
+                statusDiv.classList.add('saved');
+                setTimeout(() => {
+                    statusDiv.classList.remove('saved');
+                }, 3000);
+                break;
+            case 'error':
+                statusDiv.textContent = 'Failed to save';
+                statusDiv.classList.add('error');
+                break;
+        }
+    }
+
     setupEventListeners() {
-        document.getElementById('submit-exam').addEventListener('click', () => {
-            if (confirm('Are you sure you want to submit the exam?')) {
-                this.submitExam();
-            }
-        });
-    }
-
-    // Setup warning sebelum menutup halaman
-    setupBeforeUnload() {
-        window.addEventListener('beforeunload', (e) => {
-            if (!this.isSubmitted) {
-                e.preventDefault();
-                e.returnValue = '';
-            }
-        });
-    }
-
-    // Handle waktu habis
-    handleTimeUp() {
-        clearInterval(this.timerInterval);
-        alert('Time is up! Your exam will be submitted automatically.');
-        this.submitExam();
-    }
-
-    // Submit exam
-    submitExam() {
-        this.isSubmitted = true;
+        // Event listeners yang sudah ada
+        window.addEventListener('beforeunload', this.handleBeforeUnload.bind(this));
         
-        // Simpan log completion
-        const completionData = {
-            studentId: this.examData.studentId,
-            token: this.examData.token,
-            completionTime: new Date().toISOString(),
-            timeUsed: (this.examData.duration * 60) - this.timeLeft,
-            violations: JSON.parse(localStorage.getItem('violations') || '[]')
-        };
+        // Event listeners baru
+        document.getElementById('confirmYes').addEventListener('click', () => {
+            this.confirmModal.classList.add('hidden');
+            this.submitExam('NORMAL');
+        });
 
-        localStorage.setItem('examCompletion', JSON.stringify(completionData));
+        document.getElementById('confirmNo').addEventListener('click', () => {
+            this.confirmModal.classList.add('hidden');
+        });
 
-        // Redirect ke halaman selesai
-        window.location.href = 'end.html?status=completed';
+        // Monitor form changes
+        const examFrame = document.getElementById('examForm');
+        examFrame.addEventListener('load', () => {
+            try {
+                examFrame.contentDocument.addEventListener('change', () => {
+                    this.hasChanges = true;
+                });
+                examFrame.contentDocument.addEventListener('input', () => {
+                    this.hasChanges = true;
+                });
+            } catch (error) {
+                console.error('Error setting up form change detection:', error);
+            }
+        });
     }
 
-    // Handle form submission
-    handleFormSubmit(e) {
-        if (!this.isSubmitted) {
-            this.submitExam();
+    handleBeforeUnload(e) {
+        if (this.hasChanges && !this.isSubmitting) {
+            const message = 'You have unsaved changes. Are you sure you want to leave?';
+            e.returnValue = message;
+            return message;
         }
+    }
+
+    async submitExam(submitType) {
+        if (this.isSubmitting) return;
+        
+        try {
+            this.isSubmitting = true;
+            this.showLoading('Submitting exam...');
+
+            // Save progress satu kali terakhir
+            await this.saveProgress();
+
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'submitExam',
+                    data: {
+                        token: this.token,
+                        submitType: submitType,
+                        studentId: this.studentId
+                    }
+                })
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                // Clear intervals
+                clearInterval(this.timerInterval);
+                clearInterval(this.autoSaveInterval);
+                
+                // Clear flags
+                this.hasChanges = false;
+                this.isSubmitting = false;
+                
+                // Redirect ke end page
+                sessionStorage.setItem('examStatus', 'COMPLETED');
+                window.location.href = 'end.html';
+            } else {
+                throw new Error(result.message || 'Failed to submit exam');
+            }
+        } catch (error) {
+            console.error('Error submitting exam:', error);
+            this.isSubmitting = false;
+            this.hideLoading();
+            this.showError(`Failed to submit exam: ${error.message}`);
+        }
+    }
+
+    async getFormData(examFrame) {
+        try {
+            const formElement = examFrame.contentDocument.querySelector('form');
+            if (!formElement) return null;
+
+            const formData = new FormData(formElement);
+            const data = {};
+            for (let [key, value] of formData.entries()) {
+                data[key] = value;
+            }
+            return data;
+        } catch (error) {
+            console.error('Error getting form data:', error);
+            return null;
+        }
+    }
+
+    async restoreFormData(savedData) {
+        try {
+            const examFrame = document.getElementById('examForm');
+            const formElement = examFrame.contentDocument.querySelector('form');
+            if (!formElement || !savedData) return;
+
+            Object.entries(savedData).forEach(([key, value]) => {
+                const input = formElement.querySelector(`[name="${key}"]`);
+                if (input) {
+                    input.value = value;
+                }
+            });
+        } catch (error) {
+            console.error('Error restoring form data:', error);
+        }
+    }
+
+    showError(message) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'message error';
+        errorDiv.textContent = message;
+        document.body.appendChild(errorDiv);
+
+        setTimeout(() => {
+            errorDiv.remove();
+        }, 5000);
     }
 }
 
-// Inisialisasi exam handler saat halaman dimuat
+// Initialize exam when document is ready
 document.addEventListener('DOMContentLoaded', () => {
-    new ExamHandler();
+    window.examManager = new ExamManager();
 });
+
+export default ExamManager;

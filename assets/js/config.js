@@ -1,58 +1,49 @@
-// Konfigurasi Sistem
+// config.js
 const CONFIG = {
-    // Google Apps Script URL untuk validasi token
-    SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxywwZYnmL1WxRmkhq8IJPfn3y_ASjQT4fkx3-ZqEqilqf3UM9v0R9N25E9URLHpC_Khw/exec',
+    // URL Google Apps Script yang sudah di-deploy
+    SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxQMCzXZzvYeP7wanplG4Wh8Cs6rXBp3uqz3aiwiJGdKzfixjJMghHH_y-3Q1epTXfS_A/exec',
 
-    // Konfigurasi ujian
-    EXAM_DURATION: 60,    // Durasi default dalam menit (akan di-override oleh spreadsheet)
-    MAX_WARNINGS: 3,      // Maksimal peringatan sebelum terminate
-    
-    // Status ujian
-    STATUS: {
-        NOT_STARTED: 'not_started',
-        IN_PROGRESS: 'in_progress',
-        COMPLETED: 'completed',
-        TERMINATED: 'terminated'
+    // Timer configuration
+    TIMER: {
+        WARNING_TIME: 5, // menit
+        CHECK_INTERVAL: 1000, // milliseconds
+        WARNING_THRESHOLD: 0.1, // 10% dari total waktu
+        AUTO_SAVE_INTERVAL: 30000 // 30 detik
     },
 
-    // Konfigurasi keamanan
+    // Security configuration
     SECURITY: {
-        CHECK_INTERVAL: 1000,      // Interval pengecekan keamanan (ms)
-        FORCE_FULLSCREEN: true,    // Paksa mode fullscreen
-        PREVENT_COPY: true,        // Cegah copy-paste
-        PREVENT_PRINT: true,       // Cegah print screen
-        PREVENT_TAB_CHANGE: true,  // Cegah perpindahan tab
-        PREVENT_RIGHT_CLICK: true  // Cegah klik kanan
+        VIOLATION_TYPES: {
+            TAB_SWITCH: 'TAB_SWITCH',
+            FULLSCREEN_EXIT: 'FULLSCREEN_EXIT',
+            COPY_PASTE: 'COPY_PASTE',
+            NETWORK_ANOMALY: 'NETWORK_ANOMALY',
+            VM_DETECTED: 'VM_DETECTED',
+            AUTOMATION_DETECTED: 'AUTOMATION_DETECTED'
+        },
+        MAX_RETRIES: 3,
+        CHECK_INTERVAL: 5000 // 5 detik
     },
 
-    // Validasi token dengan Google Spreadsheet
-    validateToken: async function(token) {
-        try {
-            const response = await fetch(`${this.SCRIPT_URL}?token=${token}`);
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            
-            const data = await response.json();
-            
-            if (data.status === 'success') {
-                // Simpan data form ke session storage
-                sessionStorage.setItem('examConfig', JSON.stringify({
-                    formUrl: data.formUrl,
-                    duration: data.duration,
-                    active: data.active
-                }));
-                return true;
-            }
-            return false;
-        } catch (error) {
-            console.error('Token validation error:', error);
-            return false;
+    // Message templates
+    MESSAGES: {
+        WARNING: {
+            TAB_SWITCH: "Peringatan: Tab switching terdeteksi!",
+            FULLSCREEN_EXIT: "Peringatan: Mohon kembali ke mode fullscreen!",
+            TIME_WARNING: "Peringatan: Waktu tersisa kurang dari {minutes} menit!",
+            COPY_PASTE: "Peringatan: Copy-paste tidak diizinkan!",
+            NETWORK: "Peringatan: Koneksi internet tidak stabil!"
+        },
+        ERROR: {
+            SUBMIT: "Gagal mengirim ujian. Mohon coba lagi.",
+            NETWORK: "Koneksi terputus. Menyimpan progress...",
+            BLOCKED: "Akses diblokir karena pelanggaran keamanan."
+        },
+        SUCCESS: {
+            SAVE: "Progress berhasil disimpan",
+            SUBMIT: "Ujian berhasil diselesaikan"
         }
     }
 };
 
-// Export konfigurasi jika dibutuhkan
-if (typeof module !== 'undefined') {
-    module.exports = CONFIG;
-}
+export default CONFIG;

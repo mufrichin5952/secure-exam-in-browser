@@ -2,32 +2,104 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Secure Exam</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Exam Browser - Examination</title>
     <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        /* Add styles for new UI components */
+        .warning-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 350px;
+        }
+
+        .status-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .loading-overlay.hidden {
+            display: none;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+        }
+    </style>
 </head>
 <body>
-    <div id="warning-message">
-        <strong>⚠️ Warning:</strong>
-        <p id="warning-text"></p>
-    </div>
-
     <div class="exam-container">
         <div class="exam-header">
-            <div class="student-info">
-                <span id="student-id">Loading...</span>
+            <div class="timer-container">
+                <div id="timer" class="timer">--:--</div>
+                <div id="timer-status" class="timer-status"></div>
             </div>
-            <div class="timer">Time Left: <span id="timer">00:00:00</span></div>
-            <button id="submit-exam" class="submit-button">Submit Exam</button>
+            <div class="status-bar">
+                <div id="connection-status" class="connection-status">
+                    <span class="status-icon"></span>
+                    <span class="status-text">Connected</span>
+                </div>
+                <div id="save-status" class="save-status">
+                    <span class="status-icon"></span>
+                    <span class="status-text">Last saved: Never</span>
+                </div>
+            </div>
         </div>
-        <div class="form-container">
-            <iframe id="google-form" sandbox="allow-same-origin allow-scripts allow-forms" referrerpolicy="no-referrer"></iframe>
+
+        <div id="examContent" class="exam-content">
+            <iframe id="examForm" 
+                    class="exam-frame"
+                    sandbox="allow-same-origin allow-scripts allow-forms"
+                    style="width:100%; height:calc(100vh - 100px);">
+            </iframe>
         </div>
     </div>
 
-    <!-- Load scripts -->
-    <script src="assets/js/config.js"></script>
-    <script src="assets/js/security.js"></script>
-    <script src="assets/js/exam.js"></script>
+    <!-- Submit confirmation modal template -->
+    <template id="submitModal">
+        <div class="modal-content">
+            <h3>Submit Exam</h3>
+            <p>Are you sure you want to submit your exam?</p>
+            <div class="modal-buttons">
+                <button class="btn-primary" data-action="confirm">Yes, Submit</button>
+                <button class="btn-secondary" data-action="cancel">No, Continue</button>
+            </div>
+        </div>
+    </template>
+
+    <script type="module">
+        import eventManager from './assets/js/eventManager.js';
+        
+        // Initialize when document is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            eventManager.initialize();
+        });
+    </script>
 </body>
 </html>

@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Testing
+coverage/
+.jest/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,4 +1,4 @@
-/* Base styles */
+/* Reset dan base styles */
 * {
     margin: 0;
     padding: 0;
@@ -6,193 +6,775 @@
 }
 
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
     background-color: #f5f5f5;
     min-height: 100vh;
 }
 
 /* Container styles */
 .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Login page styles */
+.login-page {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    padding: 20px;
+    background-color: #f0f2f5;
 }
 
-/* Login box styles */
-.login-box {
+.login-form {
     background: white;
-    padding: 30px;
+    padding: 2rem;
     border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     width: 100%;
     max-width: 400px;
 }
 
-/* Input group styles */
-.input-group {
-    margin-bottom: 20px;
+.login-form h1 {
+    text-align: center;
+    color: #1a73e8;
+    margin-bottom: 1.5rem;
+}
+
+/* Form styles */
+.form-group {
+    margin-bottom: 1rem;
 }
 
 label {
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 0.5rem;
     color: #333;
 }
 
 input {
     width: 100%;
-    padding: 10px;
+    padding: 0.75rem;
     border: 1px solid #ddd;
     border-radius: 4px;
-    font-size: 16px;
+    font-size: 1rem;
+}
+
+input:focus {
+    outline: none;
+    border-color: #1a73e8;
+    box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
 }
 
 /* Button styles */
-.primary-button {
-    background: #2C3E50;
+.btn-primary {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #1a73e8;
     color: white;
     border: none;
-    padding: 12px 20px;
     border-radius: 4px;
+    font-size: 1rem;
     cursor: pointer;
-    width: 100%;
-    font-size: 16px;
-    transition: background 0.3s;
+    transition: background-color 0.2s;
 }
 
-.primary-button:hover {
-    background: #34495E;
+.btn-primary:hover {
+    background-color: #1557b0;
 }
 
-/* Warning/Error styles */
-.error-text {
-    color: #e74c3c;
-    margin-top: 10px;
+.btn-primary:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* Message styles */
+.message {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    border-radius: 4px;
     text-align: center;
 }
 
-.warning-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    z-index: 9999;
+.message.error {
+    background-color: #fde8e8;
+    color: #c81e1e;
+    border: 1px solid #fbd5d5;
 }
 
-.warning-content {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: #e74c3c;
-    color: white;
-    padding: 20px;
-    border-radius: 8px;
-    text-align: center;
+.message.success {
+    background-color: #e8fdf5;
+    color: #1ec875;
+    border: 1px solid #d5fbeb;
 }
 
-/* Exam page specific styles */
+/* Exam page styles */
 .exam-container {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    overflow: hidden;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
 }
 
 .exam-header {
-    background: #2C3E50;
-    color: white;
-    padding: 15px;
+    background: white;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.student-info {
+/* Warning styles */
+.warning {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 1rem;
+    background: #fff3cd;
+    border: 1px solid #ffeeba;
+    border-radius: 4px;
+    color: #856404;
+    z-index: 1000;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Timer styles */
+#timer {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #333;
+}
+
+#timer.warning {
+    color: #c81e1e;
+}
+
+/* Loading Overlay styles */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #1a73e8;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+    margin-top: 1rem;
+    color: #333;
+    font-size: 1.1rem;
+}
+
+/* Modal styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+}
+
+.modal-buttons {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+/* Save status indicator */
+.save-status {
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.save-status.saving {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.save-status.saved {
+    background: #d4edda;
+    color: #155724;
+}
+
+.save-status.error {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* Utility classes */
+.hidden {
+    display: none !important;
+}
+
+/* Button variants */
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .exam-header {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .modal-content {
+        width: 95%;
+        padding: 1.5rem;
+    }
+
+    .modal-buttons {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        width: 100%;
+    }
+}
+
+/* Warning animation */
+@keyframes fadeInOut {
+    0% { opacity: 0; transform: translateY(-20px); }
+    10% { opacity: 1; transform: translateY(0); }
+    90% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-20px); }
+}
+
+.warning {
+    animation: fadeInOut 5s ease-in-out;
+}
+
+/* Tambahkan setelah style yang sudah ada di style.css */
+
+/* Warning Messages */
+.warning-message {
+    background: white;
+    border-left: 4px solid;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 10px;
+    padding: 15px;
+    position: relative;
+    animation: slideIn 0.3s ease-out;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.warning-message.warning {
+    border-color: #f0ad4e;
+}
+
+.warning-message.error {
+    border-color: #d9534f;
+}
+
+.warning-message.info {
+    border-color: #5bc0de;
+}
+
+.warning-close {
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 0 5px;
+}
+
+/* Status Messages */
+.status-message {
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 10px;
+    padding: 10px 15px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease-out;
+}
+
+.status-message.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.status-message.success {
+    background-color: #dff0d8;
+    color: #3c763d;
+}
+
+.status-message.error {
+    background-color: #f2dede;
+    color: #a94442;
+}
+
+.status-message.info {
+    background-color: #d9edf7;
+    color: #31708f;
+}
+
+/* Loading Overlay */
+.loading-content {
+    text-align: center;
+}
+
+.loading-spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #1a73e8;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 15px;
+    animation: spin 1s linear infinite;
+}
+
+.loading-message {
+    color: #333;
     font-size: 16px;
+}
+
+/* Modal */
+.modal-content {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+}
+
+.modal-buttons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+/* Status Bar */
+.status-bar {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.connection-status,
+.save-status {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+}
+
+.status-icon {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.status-icon.connected {
+    background-color: #4caf50;
+}
+
+.status-icon.disconnected {
+    background-color: #f44336;
+}
+
+/* Animations */
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Timer Styles */
+.timer-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .timer {
-    font-size: 20px;
+    font-size: 24px;
     font-weight: bold;
+    color: #333;
 }
 
-.submit-button {
-    background: #27AE60;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background 0.3s;
+.timer.warning {
+    color: #f44336;
+    animation: pulse 1s infinite;
 }
 
-.submit-button:hover {
-    background: #219A52;
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
 }
 
-.form-container {
-    flex: 1;
-    overflow: hidden;
+/* Tambahkan setelah style yang sudah ada di style.css */
+
+/* Media Queries and Responsive Design */
+@media screen and (max-width: 768px) {
+    /* Header adjustments */
+    .exam-header {
+        flex-direction: column;
+        padding: 10px;
+    }
+
+    .status-bar {
+        width: 100%;
+        justify-content: center;
+        margin-top: 10px;
+    }
+
+    /* Warning container adjustments */
+    .warning-container {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
+
+    .warning-message {
+        font-size: 14px;
+        padding: 10px;
+    }
+
+    /* Modal adjustments */
+    .modal-content {
+        width: 95%;
+        padding: 15px;
+        margin: 10px;
+    }
+
+    .modal-buttons {
+        flex-direction: column;
+    }
+
+    .modal-buttons button {
+        width: 100%;
+        margin: 5px 0;
+    }
+
+    /* Timer adjustments */
+    .timer {
+        font-size: 20px;
+    }
+
+    /* Status message adjustments */
+    .status-message {
+        width: calc(100% - 20px);
+        margin: 10px;
+        font-size: 14px;
+    }
 }
 
-.exam-frame {
-    width: 100%;
-    height: 100%;
-    border: none;
+/* Tablet adjustments */
+@media screen and (min-width: 769px) and (max-width: 1024px) {
+    .exam-header {
+        padding: 15px;
+    }
+
+    .warning-container {
+        max-width: 300px;
+    }
 }
 
-/* Heading styles */
-h1 {
-    text-align: center;
-    margin-bottom: 30px;
-    color: #2C3E50;
-}
-
-/* Mobile responsive styles */
-@media (max-width: 768px) {
-    .login-box {
+/* Portrait orientation lock for mobile */
+@media screen and (max-width: 768px) and (orientation: landscape) {
+    .orientation-warning {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #fff;
+        z-index: 9999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
         padding: 20px;
     }
 
-    input {
-        font-size: 16px;
-        padding: 12px;
+    .orientation-warning::before {
+        content: "Please rotate your device to portrait mode";
+        font-size: 18px;
+        color: #333;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) {
+    /* Larger touch targets */
+    button {
+        min-height: 44px;
+        padding: 12px 20px;
+    }
+
+    /* Disable hover effects */
+    .btn-primary:hover,
+    .btn-secondary:hover {
+        transform: none;
+    }
+
+    /* Adjust scrolling behavior */
+    .exam-content {
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* High DPI screens */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    /* Sharper borders */
+    .warning-message,
+    .status-message,
+    .modal-content {
+        border-width: 0.5px;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .exam-container {
+        background-color: #1a1a1a;
+        color: #fff;
     }
 
     .exam-header {
-        flex-direction: column;
-        gap: 10px;
-        text-align: center;
+        background-color: #2d2d2d;
+    }
+
+    .timer {
+        color: #fff;
+    }
+
+    .modal-content {
+        background-color: #2d2d2d;
+        color: #fff;
+    }
+
+    .warning-message,
+    .status-message {
+        background-color: #2d2d2d;
+        color: #fff;
+    }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* Mobile Handling Styles */
+
+/* Orientation Warning */
+.orientation-warning {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #ffffff;
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.orientation-warning.hidden {
+    display: none;
+}
+
+.warning-content {
+    padding: 20px;
+    max-width: 80%;
+}
+
+.warning-icon {
+    font-size: 48px;
+    margin-bottom: 20px;
+}
+
+/* Touch-specific styles */
+@media (pointer: coarse) {
+    /* Larger touch targets */
+    .btn-primary,
+    .btn-secondary {
+        min-height: 44px;
+        padding: 12px 24px;
+        font-size: 16px;
+    }
+
+    .warning-close {
+        padding: 10px 15px;
+        font-size: 20px;
+    }
+
+    /* Prevent text selection */
+    * {
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+
+    /* Allow text selection in form inputs */
+    input, textarea {
+        -webkit-user-select: text;
+        user-select: text;
+    }
+}
+
+/* Mobile-specific adjustments */
+@media screen and (max-width: 480px) {
+    .exam-header {
+        padding: 8px;
     }
 
     .timer {
         font-size: 18px;
     }
 
-    .submit-button {
-        width: 100%;
+    .status-bar {
+        font-size: 12px;
+    }
+
+    .warning-message {
+        margin: 5px;
+        padding: 8px;
+    }
+
+    /* Adjust iframe height for mobile */
+    .exam-frame {
+        height: calc(100vh - 120px) !important;
+    }
+
+    /* Mobile modal adjustments */
+    .modal-content {
+        width: 90%;
+        margin: 5%;
         padding: 15px;
     }
 
-    .warning-content {
-        width: 90%;
-        max-width: 300px;
+    .modal-buttons button {
+        width: 100%;
+        margin: 5px 0;
     }
 }
 
-/* Animation */
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+/* Prevent elastic scrolling on iOS */
+html, body {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
 }
 
-.fade-in {
-    animation: fadeIn 0.3s ease-in;
+.exam-content {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    height: calc(100% - 60px);
+}
+
+/* Handle mobile keyboards */
+@media screen and (max-height: 400px) {
+    .exam-header {
+        position: absolute;
+        top: 0;
+        width: 100%;
+        z-index: 100;
+    }
+
+    .exam-content {
+        padding-top: 60px;
+    }
+}
+
+/* Disable pull-to-refresh */
+body {
+    overscroll-behavior-y: contain;
+}
+
+/* Safe area insets for notched devices */
+@supports (padding: max(0px)) {
+    .exam-container {
+        padding-left: max(15px, env(safe-area-inset-left));
+        padding-right: max(15px, env(safe-area-inset-right));
+        padding-bottom: max(15px, env(safe-area-inset-bottom));
+    }
 }

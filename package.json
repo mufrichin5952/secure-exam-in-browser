@@ -1,0 +1,25 @@
+{
+    "name": "secure-exam-in-browser",
+    "version": "1.0.0",
+    "description": "Secure browser-based examination system for Google Forms",
+    "main": "index.html",
+    "scripts": {
+      "test": "jest",
+      "test:watch": "jest --watch",
+      "test:coverage": "jest --coverage"
+    },
+    "dependencies": {},
+    "devDependencies": {
+      "@babel/core": "^7.22.0",
+      "@babel/preset-env": "^7.22.0",
+      "babel-jest": "^29.0.0",
+      "jest": "^29.0.0",
+      "jest-environment-jsdom": "^29.0.0"
+    },
+    "jest": {
+      "testEnvironment": "jsdom",
+      "moduleNameMapper": {
+        "^@/(.*)$": "<rootDir>/assets/js/$1"
+      }
+    }
+  }

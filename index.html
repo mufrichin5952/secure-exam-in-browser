@@ -1,36 +1,60 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Secure Exam Browser - Login</title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
-<body>
+<body class="login-page">
     <div class="container">
-        <div class="login-box">
-            <h1>Secure Exam Access</h1>
-            <div class="input-group">
-                <label for="token">Exam Token:</label>
-                <input type="text" id="token" placeholder="Enter your exam token" required>
-            </div>
-            <div class="input-group">
-                <label for="studentId">Student ID:</label>
-                <input type="text" id="studentId" placeholder="Enter your student ID" required>
-            </div>
-            <button onclick="validateAndStart()" class="primary-button">Start Exam</button>
-            <div id="error-message" class="error-text"></div>
+        <div class="login-form">
+            <h1>Secure Exam Login</h1>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="token">Access Token:</label>
+                    <input type="text" id="token" required>
+                </div>
+                <button type="submit" class="btn-primary">Start Exam</button>
+            </form>
+            <div id="message" class="message"></div>
         </div>
     </div>
-
-    <div id="warning-message" class="warning-overlay">
-        <div class="warning-content">
-            <strong>⚠️ Warning</strong>
-            <p id="warning-text"></p>
-        </div>
-    </div>
-
     <script src="assets/js/config.js"></script>
     <script src="assets/js/security.js"></script>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = document.getElementById('token').value;
+            const messageDiv = document.getElementById('message');
+            
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'validateToken',
+                        data: { token }
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.valid) {
+                    sessionStorage.setItem('examToken', token);
+                    sessionStorage.setItem('formUrl', result.formUrl);
+                    sessionStorage.setItem('duration', result.duration);
+                    sessionStorage.setItem('studentId', result.studentId);
+                    window.location.href = 'exam.html';
+                } else {
+                    messageDiv.textContent = result.message || 'Invalid token';
+                    messageDiv.className = 'message error';
+                }
+            } catch (error) {
+                messageDiv.textContent = 'Error validating token';
+                messageDiv.className = 'message error';
+            }
+        });
+    </script>
 </body>
 </html>

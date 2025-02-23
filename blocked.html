@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Access Blocked</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .blocked-container {
+            text-align: center;
+            padding: 2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .violation-list {
+            text-align: left;
+            background: #fff3cd;
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+        
+        .unblock-form {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="login-page">
+    <div class="blocked-container">
+        <h1>Exam Access Blocked</h1>
+        <div class="message error">
+            Your exam access has been blocked due to security violations.
+        </div>
+
+        <div class="violation-list">
+            <h3>Violation Details:</h3>
+            <div id="violationDetails">Loading...</div>
+        </div>
+
+        <div class="unblock-form">
+            <h3>Unblock Access</h3>
+            <p>Please contact your exam supervisor and provide your token:</p>
+            <div id="tokenDisplay" class="form-group"></div>
+            
+            <form id="unblockForm">
+                <div class="form-group">
+                    <label for="unblockCode">Unblock Code:</label>
+                    <input type="text" id="unblockCode" required>
+                </div>
+                <button type="submit" class="btn-primary">Unblock Access</button>
+            </form>
+            <div id="message" class="message"></div>
+        </div>
+    </div>
+
+    <script src="assets/js/config.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const token = sessionStorage.getItem('examToken');
+            const studentId = sessionStorage.getItem('studentId');
+            
+            if (!token) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Display token
+            document.getElementById('tokenDisplay').textContent = `Token: ${token}`;
+
+            // Load violation details
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'getViolationHistory',
+                        data: { token }
+                    })
+                });
+
+                const violations = await response.json();
+                displayViolations(violations);
+            } catch (error) {
+                console.error('Error loading violations:', error);
+            }
+
+            // Handle unblock form
+            document.getElementById('unblockForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const unblockCode = document.getElementById('unblockCode').value;
+                const messageDiv = document.getElementById('message');
+
+                try {
+                    const response = await fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            action: 'unblockToken',
+                            data: { 
+                                token,
+                                unblockCode
+                            }
+                        })
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        messageDiv.textContent = 'Access restored. Redirecting...';
+                        messageDiv.className = 'message success';
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 2000);
+                    } else {
+                        throw new Error(result.message || 'Invalid unblock code');
+                    }
+                } catch (error) {
+                    messageDiv.textContent = error.message;
+                    messageDiv.className = 'message error';
+                }
+            });
+        });
+
+        function displayViolations(violations) {
+            const violationDiv = document.getElementById('violationDetails');
+            if (violations.length === 0) {
+                violationDiv.textContent = 'No violations found';
+                return;
+            }
+
+            const violationList = violations.map(v => `
+                <div class="violation-item">
+                    <strong>${new Date(v.timestamp).toLocaleString()}</strong>
+                    <p>${v.violationType}: ${v.details}</p>
+                </div>
+            `).join('');
+
+            violationDiv.innerHTML = violationList;
+        }
+    </script>
+</body>
+</html>
