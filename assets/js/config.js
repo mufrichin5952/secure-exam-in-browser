@@ -1,7 +1,7 @@
 // config.js
 const CONFIG = {
     // URL Google Apps Script yang sudah di-deploy
-    SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxQMCzXZzvYeP7wanplG4Wh8Cs6rXBp3uqz3aiwiJGdKzfixjJMghHH_y-3Q1epTXfS_A/exec',
+    SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxHt0jS4LwzXOVxo1y2gR8xRAxhfBlt4Z0NLsbJGZf16O5q5ho1EN0Vmj_Yja7fbQURJQ/exec',
 
     // Timer configuration
     TIMER: {
